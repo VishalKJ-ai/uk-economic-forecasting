@@ -1,0 +1,152 @@
+# =============================================================================
+# UK Economic Forecasting Pipeline — Configuration
+# =============================================================================
+# All tuneable parameters live here. No magic numbers in source code.
+
+# ── Data Sources ────────────────────────────────────────────────────────────
+data_sources:
+  ons:
+    base_url: "https://api.ons.gov.uk"
+    datasets:
+      gdp:
+        dataset_id: "pgdp"
+        edition: "time-series"
+        description: "Gross Domestic Product: quarter-on-quarter growth"
+        frequency: "quarterly"
+        series_id: "IHYQ"
+      cpi:
+        dataset_id: "cpih01"
+        edition: "time-series"
+        description: "Consumer Prices Index including housing costs"
+        frequency: "monthly"
+        series_id: "L55O"
+      unemployment:
+        dataset_id: "lms"
+        edition: "time-series"
+        description: "Labour market statistics — unemployment rate"
+        frequency: "monthly"
+        series_id: "MGSX"
+      retail_sales:
+        dataset_id: "drsi"
+        edition: "time-series"
+        description: "Retail Sales Index — all retailing including fuel"
+        frequency: "monthly"
+        series_id: "J5EK"
+      industrial_production:
+        dataset_id: "iop"
+        edition: "time-series"
+        description: "Index of Production — total production"
+        frequency: "monthly"
+        series_id: "K222"
+    rate_limit_seconds: 1.0
+    max_retries: 3
+    timeout_seconds: 30
+
+  boe:
+    base_url: "https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp"
+    series:
+      bank_rate:
+        series_code: "IUDBEDR"
+        description: "Official Bank Rate"
+        frequency: "monthly"
+      m4_money_supply:
+        series_code: "LPMAUYN"
+        description: "M4 money supply — annual growth rate"
+        frequency: "monthly"
+      mortgage_approvals:
+        series_code: "LPMB3TA"
+        description: "Mortgage approvals for house purchase (thousands)"
+        frequency: "monthly"
+      consumer_credit:
+        series_code: "LPMBL3C"
+        description: "Net consumer credit (GBP millions)"
+        frequency: "monthly"
+    rate_limit_seconds: 1.0
+    max_retries: 3
+    timeout_seconds: 30
+
+# ── Date Range ──────────────────────────────────────────────────────────────
+date_range:
+  start: "2010-01-01"
+  end: "2024-12-31"
+
+# ── Feature Engineering ─────────────────────────────────────────────────────
+features:
+  lag_periods: [1, 3, 6, 12]
+  rolling_windows: [3, 6, 12]
+  rolling_statistics: ["mean", "std"]
+  change_periods:
+    mom: 1           # month-over-month
+    yoy: 12          # year-over-year
+  interaction_pairs:
+    - ["bank_rate", "cpi"]
+    - ["unemployment_rate", "gdp"]
+    - ["m4_growth", "cpi"]
+    - ["mortgage_approvals", "bank_rate"]
+
+# ── Train / Test Split ──────────────────────────────────────────────────────
+split:
+  train_end: "2022-12-31"
+  test_start: "2023-01-01"
+
+# ── Forecast Horizons (months ahead) ───────────────────────────────────────
+forecast_horizons: [1, 3, 6]
+
+# ── Primary Targets ─────────────────────────────────────────────────────────
+targets:
+  - "gdp"
+  - "cpi"
+
+# ── Model Hyperparameters ───────────────────────────────────────────────────
+models:
+  arima:
+    max_p: 5
+    max_d: 2
+    max_q: 5
+    seasonal: true
+    seasonal_period: 12
+    stepwise: true
+    information_criterion: "aic"
+
+  xgboost:
+    param_grid:
+      n_estimators: [100, 200, 500]
+      max_depth: [3, 5, 7]
+      learning_rate: [0.01, 0.05, 0.1]
+      subsample: [0.8, 1.0]
+      colsample_bytree: [0.8, 1.0]
+    cv_folds: 5
+    early_stopping_rounds: 20
+
+  neural_net:
+    hidden_layers: [128, 64, 32]
+    dropout: 0.3
+    learning_rate: 0.001
+    weight_decay: 0.0001
+    batch_size: 32
+    max_epochs: 200
+    patience: 20
+    lr_scheduler:
+      factor: 0.5
+      patience: 10
+
+# ── Evaluation ──────────────────────────────────────────────────────────────
+evaluation:
+  metrics: ["rmse", "mae", "mape"]
+  diebold_mariano_significance: 0.05
+
+# ── Paths (relative to project root) ───────────────────────────────────────
+paths:
+  raw_data: "data/raw"
+  processed_data: "data/processed"
+  sample_data: "data/sample"
+  models: "models"
+  figures: "outputs/figures"
+  forecasts: "outputs/forecasts"
+
+# ── Logging ─────────────────────────────────────────────────────────────────
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(name)-25s | %(levelname)-8s | %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
+  file: "pipeline.log"
