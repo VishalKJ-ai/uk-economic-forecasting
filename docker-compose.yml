@@ -1,0 +1,26 @@
+# =============================================================================
+# UK Economic Forecasting Pipeline — Docker Compose
+# =============================================================================
+#
+# Usage:
+#   docker compose up                          # Run with sample data
+#   docker compose run forecast --mode full    # Full pipeline (needs API access)
+#
+# Outputs are persisted to local directories via volume mounts.
+
+services:
+  forecast:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: uk-economic-forecast
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./outputs:/app/outputs
+    environment:
+      - PYTHONPATH=/app
+      # Optional: uncomment and set if using live API mode
+      # - ONS_API_KEY=${ONS_API_KEY:-}
+      # - BOE_API_KEY=${BOE_API_KEY:-}
+    command: ["--mode", "sample"]
