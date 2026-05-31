@@ -1,7 +1,7 @@
 target,horizon_months,model,forecast,forecast_date
 gdp,1,XGBoost,0.33537585,2024-12-01
-gdp,1,NeuralNet,-0.09893917,2024-12-01
+gdp,1,NeuralNet,1.2376631,2024-12-01
 gdp,3,XGBoost,-0.20924337,2024-12-01
-gdp,3,NeuralNet,-0.3960241,2024-12-01
+gdp,3,NeuralNet,-0.019956436,2024-12-01
 gdp,6,XGBoost,0.25219992,2024-12-01
-gdp,6,NeuralNet,0.11430866,2024-12-01
+gdp,6,NeuralNet,-1.1540586,2024-12-01
