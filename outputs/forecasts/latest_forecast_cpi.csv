@@ -1,7 +1,7 @@
 target,horizon_months,model,forecast,forecast_date
 cpi,1,XGBoost,1.7464703,2024-12-01
-cpi,1,NeuralNet,1.0738539,2024-12-01
+cpi,1,NeuralNet,1.6159382,2024-12-01
 cpi,3,XGBoost,1.8714323,2024-12-01
-cpi,3,NeuralNet,0.83166635,2024-12-01
+cpi,3,NeuralNet,-0.5042089,2024-12-01
 cpi,6,XGBoost,1.9041437,2024-12-01
-cpi,6,NeuralNet,1.278214,2024-12-01
+cpi,6,NeuralNet,1.5049047,2024-12-01
